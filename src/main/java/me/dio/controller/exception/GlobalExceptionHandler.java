@@ -21,15 +21,19 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<String> handleNoContentException() {
-        return new ResponseEntity<>("Resource ID not found.", HttpStatus.NOT_FOUND);
+    public ResponseEntity<ErrorResponse> handleNoContentException() {
+        var errorResponse = new ErrorResponse("Resource ID not found.", HttpStatus.NOT_FOUND);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Throwable.class)
-    public ResponseEntity<String> handleUnexpectedException(Throwable unexpectedException) {
+    public ResponseEntity<ErrorResponse> handleUnexpectedException(Throwable unexpectedException) {
         String message = "Unexpected server error.";
         LOGGER.error(message, unexpectedException);
-        return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
+
+        var errorResponse = new ErrorResponse(message, HttpStatus.INTERNAL_SERVER_ERROR);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
-
