@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import me.dio.service.exception.BusinessException;
 import me.dio.service.exception.NotFoundException;
@@ -16,24 +17,25 @@ public class GlobalExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<String> handleBusinessException(BusinessException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+    public ResponseEntity<ResponseStatusException> handleBusinessException(BusinessException ex) {
+        var error = new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNoContentException() {
-        var errorResponse = new ErrorResponse("Resource ID not found.", HttpStatus.NOT_FOUND);
+    public ResponseEntity<ResponseStatusException> handleNoContentException() {
+        var errorResponse = new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource ID not found.");
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Throwable.class)
-    public ResponseEntity<ErrorResponse> handleUnexpectedException(Throwable unexpectedException) {
+    public ResponseEntity<ResponseStatusException> handleUnexpectedException(Throwable unexpectedException) {
         String message = "Unexpected server error.";
         LOGGER.error(message, unexpectedException);
 
-        var errorResponse = new ErrorResponse(message, HttpStatus.INTERNAL_SERVER_ERROR);
+        var error = new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, message);
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
